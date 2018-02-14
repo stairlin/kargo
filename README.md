@@ -35,7 +35,7 @@ Kargo is currently tested on go 1.9.
 5. Run `go get -v -t -d ./...`
 6. Run `go run main.go`
 
-## Basic Usage
+## Usage
 
 Backup & restore data:
 
@@ -52,6 +52,12 @@ kargo list --from 2018-02-14
 kargo list --prefix foo --to 2017-12-31
 kargo list --pattern ^[a-z]{3}.*
 kargo list --limit 50
+```
+
+Backup with a custom key name
+
+```shell
+kargo backup --key dat_snapshot
 ```
 
 Pull a backup to local disk & restore data:
@@ -90,7 +96,7 @@ Show the current configuration:
 kargo config
 ```
 
-Example or a configuration file.
+Example of a configuration file.
 
 ```toml
 [agent]
