@@ -44,10 +44,21 @@ kargo backup
 kargo restore my_backup_key
 ```
 
-List all backups:
+List backups:
 
 ```shell
 kargo list
+kargo list --from 2018-02-14
+kargo list --prefix foo --to 2017-12-31
+kargo list --pattern ^[a-z]{3}.*
+kargo list --limit 50
+```
+
+Pull a backup to local disk & restore data:
+
+```shell
+kargo pull my_backup_key
+kargo restore --local my_backup_key
 ```
 
 Help:
@@ -55,7 +66,6 @@ Help:
 ```shell
 kargo help
 ```
-
 
 ## Configuration
 
@@ -144,7 +154,7 @@ Most dependencies are packed into the binary, such as AWS S3, gzip, Pagerduty, e
 Kargo piggyback on the powerful Go [I/O library](https://golang.org/pkg/io/) to keep the memory and disk footprint minimal. In most cases, data is being streamed from the source to the storage with no or minimal internal buffering. There are plugins, such as `cipher` that must work data by chunks for obvious reasons, so it will use
 a small buffer.
 
-It is worth noting that most `Source` plugins cannot stream data right away, Indeed, they have to create a temporary file that contains the backup before. `postgres` is currently the only plugin that can stream data directly, thanks to `pg_dump`.
+It is worth noting that most `Source` plugins cannot stream data right away. Indeed, they have to create a temporary file that contains the backup before. `postgres` is currently the only plugin that can stream data directly, thanks to `pg_dump`.
 
 ## Contributing
 
