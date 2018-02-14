@@ -67,3 +67,10 @@ sign:
   artifacts: none
 env_files:
   github_token: ~/.config/goreleaser/github_token
+brew:
+  # Reporitory to push the tap to.
+  github:
+    owner: stairlin
+    name: homebrew-tap
+  homepage: "https://github.com/stairlin/kargo"
+  description: "The plugin-driven CLI for backing up & restoring data."

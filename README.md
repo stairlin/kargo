@@ -136,7 +136,7 @@ Most dependencies are packed into the binary, such as AWS S3, gzip, Pagerduty, e
 
 ## Internal design
 
-Kargo piggyback on the powerful Go [I/O library](https://golang.org/pkg/io/) to keep the memory and disk footprint minimal. In most cases, the data is being streamed from the source to the storage with no or minimal internal buffering. There are plugins, such as `cipher` that must work data by chunks for obvious reasons, so it will use
+Kargo piggyback on the powerful Go [I/O library](https://golang.org/pkg/io/) to keep the memory and disk footprint minimal. In most cases, data is being streamed from the source to the storage with no or minimal internal buffering. There are plugins, such as `cipher` that must work data by chunks for obvious reasons, so it will use
 a small buffer.
 
 It is worth noting that most `Source` plugins cannot stream data right away, Indeed, they have to create a temporary file that contains the backup before. `postgres` is currently the only plugin that can stream data directly, thanks to `pg_dump`.
