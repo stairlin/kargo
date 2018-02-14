@@ -7,9 +7,12 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/stairlin/kargo/context"
+	"github.com/stairlin/kargo/log"
 	"github.com/stairlin/kargo/plugin/storage"
 )
 
@@ -85,16 +88,70 @@ func (s *Store) Pull(
 }
 
 func (s *Store) Walk(
-	ctx *context.Context, walkFn func(key string, f os.FileInfo, err error) error,
+	ctx *context.Context,
+	filter *storage.WalkFilter,
+	walkFn func(key string, f os.FileInfo, err error) error,
 ) {
-	filepath.Walk(s.Path, func(path string, f os.FileInfo, err error) error {
+	var i int
+	var items []listItem
+	err := filepath.Walk(s.Path, func(path string, f os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
 		if f.IsDir() {
 			return nil
 		}
+		i++
+
 		key, err := filepath.Rel(s.Path, path)
 		if err != nil {
 			return err
 		}
-		return walkFn(key, f, err)
+
+		if (filter.Limit == 0 || i <= int(filter.Limit)) &&
+			isBetween(filter, f.ModTime().UnixNano()) &&
+			matches(filter, key) {
+			items = append(items, listItem{
+				SortingKey: f.ModTime().UnixNano(),
+				Key:        key,
+				Info:       f,
+			})
+		}
+		return nil
 	})
+	if err != nil {
+		ctx.Error("fs: walk error", log.Error(err))
+		return
+	}
+
+	// Sort items
+	sort.Sort(listItemsDesc(items))
+
+	// Call back
+	for _, item := range items {
+		if err := walkFn(item.Key, item.Info, nil); err != nil {
+			return
+		}
+	}
 }
+
+func isBetween(f *storage.WalkFilter, t int64) bool {
+	return t >= f.From && t <= f.To
+}
+
+func matches(f *storage.WalkFilter, name string) bool {
+	return strings.HasPrefix(name, f.Prefix) &&
+		(f.Pattern == nil || f.Pattern.MatchString(name))
+}
+
+type listItem struct {
+	SortingKey int64
+	Key        string
+	Info       os.FileInfo
+}
+
+type listItemsDesc []listItem
+
+func (a listItemsDesc) Len() int           { return len(a) }
+func (a listItemsDesc) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a listItemsDesc) Less(i, j int) bool { return a[i].SortingKey > a[j].SortingKey }

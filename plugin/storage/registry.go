@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"regexp"
 
 	"github.com/stairlin/kargo/context"
 )
@@ -22,7 +23,20 @@ type Storage interface {
 	// directory in the tree, including root. All errors that arise visiting
 	// files and directories are filtered by walkFn. The files are walked in
 	// lexical order, which makes the output deterministic.
-	Walk(ctx *context.Context, f func(key string, f os.FileInfo, err error) error)
+	Walk(
+		ctx *context.Context,
+		filter *WalkFilter,
+		f func(key string, f os.FileInfo, err error) error,
+	)
+}
+
+// WalkFilter filters files called by Walk
+type WalkFilter struct {
+	From    int64
+	To      int64
+	Prefix  string
+	Pattern *regexp.Regexp
+	Limit   uint
 }
 
 type Creator func() Storage

@@ -20,8 +20,6 @@ import (
 	"math"
 	"os"
 	"regexp"
-	"sort"
-	"strings"
 	"text/tabwriter"
 	"time"
 
@@ -31,9 +29,15 @@ import (
 	"github.com/stairlin/kargo/log"
 	"github.com/stairlin/kargo/pkg/ago"
 	"github.com/stairlin/kargo/pkg/bytefmt"
+	"github.com/stairlin/kargo/plugin/storage"
 )
 
 const day = time.Hour * 24
+
+var (
+	// limit defines a limit of elements to display
+	limit uint
+)
 
 // listCmd represents the list command
 var listCmd = &cobra.Command{
@@ -83,61 +87,44 @@ var listCmd = &cobra.Command{
 			}
 			to = endOfDay(t.UnixNano())
 		}
-
-		// Filter files from storage
-		ctx.Info("Fetching file metadata from storage...")
-		var totalItems int
-		var totalSize int64
-		var items []listItem
-		walkFn := func(key string, f os.FileInfo, err error) error {
-			totalItems++
-			if err != nil {
-				return err
-			}
-			totalSize += f.Size()
-			if f.ModTime().UnixNano() < from {
-				return nil
-			}
-			if f.ModTime().UnixNano() > to {
-				return nil
-			}
-			if !strings.HasPrefix(key, prefix) {
-				return nil
-			}
-			if pattern != nil && !pattern.MatchString(key) {
-				return nil
-			}
-
-			items = append(items, listItem{
-				SortingKey: f.ModTime().UnixNano(),
-				Key:        key,
-				Info:       f,
-			})
-			return nil
+		filter := storage.WalkFilter{
+			From:    from,
+			To:      to,
+			Prefix:  prefix,
+			Pattern: pattern,
+			Limit:   limit,
 		}
-		agent.Storage.Walk(ctx, walkFn)
 
-		// Sort items
-		sort.Sort(listItemsDesc(items))
-
-		// Output result
+		// Build output
 		w := new(tabwriter.Writer)
 		buf := bytes.NewBuffer([]byte{})
 		w.Init(buf, 0, 8, 0, '\t', 0)
 		fmt.Fprintln(w, "KEY\t SIZE\t LAST MODIFICATION\t FROM NOW")
-		for _, item := range items {
+
+		var totalItems int
+		var totalSize int64
+		walkFn := func(key string, f os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			totalItems++
+			totalSize += f.Size()
+
 			fmt.Fprintf(w, "%s\t %s\t %s\t %s\n",
-				item.Key,
-				bytefmt.HumanReadableByte(item.Info.Size()),
-				item.Info.ModTime().String(),
-				ago.Ago(item.Info.ModTime()),
+				key,
+				bytefmt.HumanReadableByte(f.Size()),
+				f.ModTime().String(),
+				ago.Ago(f.ModTime()),
 			)
+			return nil
 		}
+		agent.Storage.Walk(ctx, &filter, walkFn)
+
 		w.Flush()
+		fmt.Println()
 		fmt.Println(buf.String())
 		fmt.Printf(
-			"DISPLAYED %d TOTAL %d (%s)\n",
-			len(items),
+			"ITEMS %d (%s)\n",
 			totalItems,
 			bytefmt.HumanReadableByte(totalSize),
 		)
@@ -159,19 +146,8 @@ func init() {
 	listCmd.Flags().StringP("prefix", "", "", "Filter keys with a prefix")
 	listCmd.Flags().StringP("from", "", "", "Keep keys created after time t")
 	listCmd.Flags().StringP("to", "", "", "Keep keys created before time t")
+	listCmd.Flags().UintVarP(&limit, "limit", "l", 30, "Limit the number of keys displayed")
 }
-
-type listItem struct {
-	SortingKey int64
-	Key        string
-	Info       os.FileInfo
-}
-
-type listItemsDesc []listItem
-
-func (a listItemsDesc) Len() int           { return len(a) }
-func (a listItemsDesc) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a listItemsDesc) Less(i, j int) bool { return a[i].SortingKey > a[j].SortingKey }
 
 func beginningOfDay(t int64) int64 {
 	return floor(t, day)

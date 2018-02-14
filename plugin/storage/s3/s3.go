@@ -2,11 +2,13 @@
 package s3
 
 import (
+	"fmt"
 	"io"
-	"log"
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -18,12 +20,15 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/pkg/errors"
 	"github.com/stairlin/kargo/context"
+	"github.com/stairlin/kargo/log"
 	"github.com/stairlin/kargo/pkg/unit"
 	"github.com/stairlin/kargo/plugin/storage"
 )
 
 const (
-	name = "s3"
+	name    = "s3"
+	slash   = "/"
+	maxKeys = 1000 // S3 max items per listing
 
 	limit     = unit.GB * 5 // Max allowed chunk size
 	chunk     = unit.MB * 250
@@ -80,7 +85,7 @@ func (s *Store) Init() error {
 	if s.Debug {
 		// Log every request made and its payload
 		sesh.Handlers.Send.PushFront(func(r *request.Request) {
-			log.Printf("Request: %s/%s, Payload: %s\n",
+			fmt.Printf("Request: %s/%s, Payload: %s\n",
 				r.ClientInfo.ServiceName, r.Operation.Name, r.Params)
 		})
 	}
@@ -177,13 +182,19 @@ func (s *Store) Pull(
 }
 
 func (s *Store) Walk(
-	ctx *context.Context, walkFn func(key string, f os.FileInfo, err error) error,
+	ctx *context.Context,
+	filter *storage.WalkFilter,
+	walkFn func(key string, f os.FileInfo, err error) error,
 ) {
 	input := &s3.ListObjectsInput{
-		Bucket: aws.String(s.Bucket),
+		Bucket:  aws.String(s.Bucket),
+		MaxKeys: aws.Int64(maxKeys),
 	}
-	if s.Folder != "" {
-		input.Prefix = aws.String(s.Folder)
+	if s.Folder != "" && s.Folder != slash {
+		input.Prefix = aws.String(path.Clean(s.Folder) + slash)
+	}
+	if filter.Prefix != "" {
+		input.Prefix = aws.String(aws.StringValue(input.Prefix) + filter.Prefix)
 	}
 
 	// Fetch list
@@ -192,8 +203,28 @@ func (s *Store) Walk(
 		walkFn("", nil, errors.Wrap(err, "cannot list backups from S3"))
 		return
 	}
+	if len(out.Contents) == maxKeys {
+		ctx.Warn(
+			"S3 list objects max key reached. Some keys will be missing.",
+			log.Int64("keys", maxKeys),
+		)
+	}
 
+	var i int
+	var objects []*s3.Object
 	for _, o := range out.Contents {
+		i++
+		if (filter.Limit == 0 || i <= int(filter.Limit)) &&
+			isBetween(filter, aws.TimeValue(o.LastModified).UnixNano()) &&
+			matches(filter, aws.StringValue(o.Key)) {
+			objects = append(objects, o)
+		}
+	}
+
+	// Sort items
+	sort.Sort(byModTimeDesc(objects))
+
+	for _, o := range objects {
 		info := s.objectInfo(o)
 		if err := walkFn(info.Name(), info, nil); err != nil {
 			return
@@ -272,4 +303,23 @@ func (i *info) IsDir() bool {
 // underlying data source (can return nil)
 func (i *info) Sys() interface{} {
 	return nil
+}
+
+func isBetween(f *storage.WalkFilter, t int64) bool {
+	return t >= f.From && t <= f.To
+}
+
+func matches(f *storage.WalkFilter, name string) bool {
+	return strings.HasPrefix(name, f.Prefix) &&
+		(f.Pattern == nil || f.Pattern.MatchString(name))
+}
+
+type byModTimeDesc []*s3.Object
+
+func (l byModTimeDesc) Len() int      { return len(l) }
+func (l byModTimeDesc) Swap(i, j int) { l[i], l[j] = l[j], l[i] }
+func (l byModTimeDesc) Less(i, j int) bool {
+	a := aws.TimeValue(l[i].LastModified).UnixNano()
+	b := aws.TimeValue(l[j].LastModified).UnixNano()
+	return a > b
 }

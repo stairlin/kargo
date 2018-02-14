@@ -3,6 +3,7 @@ package fs_test
 import (
 	"bytes"
 	"io/ioutil"
+	"math"
 	"os"
 	"strconv"
 	"testing"
@@ -98,7 +99,10 @@ func TestWalk(t *testing.T) {
 
 	expect := 0
 	count := 0
-	store.Walk(ctx, func(path string, f os.FileInfo, err error) error {
+	filter := &storage.WalkFilter{
+		To: int64(math.MaxInt64),
+	}
+	store.Walk(ctx, filter, func(path string, f os.FileInfo, err error) error {
 		count++
 		return nil
 	})
@@ -115,7 +119,10 @@ func TestWalk(t *testing.T) {
 
 	expect = 1
 	count = 0
-	store.Walk(ctx, func(path string, f os.FileInfo, err error) error {
+	filter = &storage.WalkFilter{
+		To: int64(math.MaxInt64),
+	}
+	store.Walk(ctx, filter, func(path string, f os.FileInfo, err error) error {
 		count++
 		return nil
 	})
@@ -135,7 +142,10 @@ func TestWalk(t *testing.T) {
 
 	expect = 51
 	count = 0
-	store.Walk(ctx, func(path string, f os.FileInfo, err error) error {
+	filter = &storage.WalkFilter{
+		To: int64(math.MaxInt64),
+	}
+	store.Walk(ctx, filter, func(path string, f os.FileInfo, err error) error {
 		if checked, exists := paths[path]; exists {
 			if checked {
 				t.Errorf("key %s already checked", path)
