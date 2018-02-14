@@ -180,8 +180,7 @@ func (s *Store) Walk(
 	ctx *context.Context, walkFn func(key string, f os.FileInfo, err error) error,
 ) {
 	input := &s3.ListObjectsInput{
-		Bucket:  aws.String(s.Bucket),
-		MaxKeys: aws.Int64(1000),
+		Bucket: aws.String(s.Bucket),
 	}
 	if s.Folder != "" {
 		input.Prefix = aws.String(s.Folder)
