@@ -166,7 +166,6 @@ func (a *Agent) Notify(ctx *context.Context, n *notification.Notification) error
 				fmt.Sprintf("%s failed to send notification", notifier.Name()),
 				log.Error(err),
 			)
-			return err
 		}
 	}
 	return nil
