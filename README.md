@@ -19,6 +19,11 @@ New plugins are designed to be easy to contribute, we'll eagerly accept pull req
 
 You can download the binaries from the [release](https://github.com/stairlin/kargo/releases) section.
 
+From Homebrew (macOS):
+
+1. Run `brew tap stairlin/homebrew-tap`
+2. Run `brew install stairlin/tap/kargo`
+
 From Source:
 
 Kargo is currently tested on go 1.9.
