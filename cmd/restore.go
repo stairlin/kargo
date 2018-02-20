@@ -107,10 +107,10 @@ var restoreCmd = &cobra.Command{
 		var data io.ReadCloser
 		var info os.FileInfo
 		if local {
-			ctx.Info("Loading file from local disk...")
+			ctx.Info("Loading file from local disk...", log.String("key", key))
 			data, info, err = ctx.Load(key)
 		} else {
-			ctx.Info("Pulling file from storage...")
+			ctx.Info("Pulling file from storage...", log.String("key", key))
 			data, info, err = agent.Storage.Pull(ctx, key)
 
 			// Run processors backward

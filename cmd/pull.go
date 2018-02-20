@@ -52,7 +52,7 @@ var pullCmd = &cobra.Command{
 		}
 
 		// Pull data from store
-		ctx.Info("Pulling file from storage...")
+		ctx.Info("Pulling file from storage...", log.String("key", key))
 		data, info, err := agent.Storage.Pull(ctx, key)
 		if err != nil {
 			ctx.Error("Failed to pull file", log.Error(err))
