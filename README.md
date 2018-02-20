@@ -32,7 +32,7 @@ Kargo is currently tested on go 1.9.
 2. [Setup your GOPATH](https://golang.org/doc/code.html#GOPATH)
 3. Run `go get -d github.com/stairlin/kargo`
 4. Run `cd $GOPATH/src/github.com/stairlin/kargo`
-5. Run `go get -v -t -d ./...`
+5. Run `go get -d ./...`
 6. Run `go run main.go`
 
 ## Usage
