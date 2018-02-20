@@ -23,8 +23,10 @@ import (
 )
 
 type Agent struct {
-	Debug  bool `toml:"debug"`
-	Silent bool
+	// Workdir is the directory where temporary files and folders are created
+	Workdir string `toml:"workdir"`
+	Debug   bool   `toml:"debug"`
+	Silent  bool
 
 	Source     source.Source
 	Processors []process.Processor
@@ -65,6 +67,9 @@ func Build(ctx *context.Context, configPath string) (*Agent, error) {
 		if err := conf.Unmarshal(a); err != nil {
 			return nil, errors.Wrap(err, "cannot unmarshal agent config")
 		}
+	}
+	if ctx.Workdir == "" {
+		ctx.Workdir = a.Workdir
 	}
 
 	// Source
