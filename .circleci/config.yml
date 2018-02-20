@@ -20,6 +20,7 @@ jobs:
     steps:
       - checkout
       - run: ./.circleci/install_goreleaser.sh
+      - run: go get -d ./...
       - run:
           name: Build & Publish release
           command: goreleaser || true
