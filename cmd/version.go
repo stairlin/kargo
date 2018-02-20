@@ -12,15 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package cmd
 
 import (
-	"github.com/stairlin/kargo/cmd"
+	"fmt"
+
+	"github.com/spf13/cobra"
 )
 
-var version = "master"
+// versionCmd represents the version command
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "Print Kargo version",
+	Long:  "Version prints the Kargo version, as reported by cmd.Version",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("Kargo version", Version)
+	},
+}
 
-func main() {
-	cmd.Version = version
-	cmd.Execute()
+func init() {
+	rootCmd.AddCommand(versionCmd)
 }

@@ -22,6 +22,9 @@ import (
 )
 
 var (
+	// Version contains the current binary version
+	Version string
+
 	// configPath is the path to the configuration file
 	configPath string
 	// workdir contains a path where temporary files must be stored.
