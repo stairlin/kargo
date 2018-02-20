@@ -22,7 +22,7 @@ jobs:
       - run: ./.circleci/install_goreleaser.sh
       - run:
           name: Build & Publish release
-          command: ./goreleaser || true
+          command: goreleaser || true
 
 workflows:
   version: 2

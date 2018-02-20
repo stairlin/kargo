@@ -23,4 +23,4 @@ download() {
 }
 
 download
-tar -xf "$TAR_FILE" -C .
+sudo tar -xf "$TAR_FILE" -C /usr/bin
