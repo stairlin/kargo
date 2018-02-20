@@ -132,16 +132,19 @@ func (c *Context) Load(name string) (io.ReadCloser, os.FileInfo, error) {
 // TempPath returns a random file name for a temporary file
 // TODO: Remove
 func (c *Context) TempPath() string {
-	dir, err := ioutil.TempDir(c.Workdir, "tmp")
+	if err := os.MkdirAll(c.Workdir, os.ModeDir); err != nil {
+		panic(err)
+	}
+	dir, err := ioutil.TempDir(c.Workdir, "kargo-tmp-"+c.UUID)
 	if err != nil {
 		panic(err)
 	}
-	path := filepath.Join(dir, "kargo"+uuid.New().String())
 
 	c.mu.Lock()
-	c.dirs = append(c.dirs, path)
+	c.dirs = append(c.dirs, dir)
 	c.mu.Unlock()
-	return path
+
+	return filepath.Join(dir, uuid.New().String())
 }
 
 // Cleanup closes all closers and removes all temporary files. This should be
