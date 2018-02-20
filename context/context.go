@@ -16,6 +16,12 @@ import (
 	"github.com/stairlin/kargo/log"
 )
 
+const (
+	// defaultChmod defines the default permissions applied to folders/files
+	// created by a context
+	defaultChmod = 0640
+)
+
 // Context is a standard context enhanced for Kargo. It contains useful
 // functions and additional context.
 type Context struct {
@@ -77,6 +83,9 @@ func (c *Context) CreateTempFile(r io.Reader) (*os.File, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot create temporary file")
 	}
+	if err := f.Chmod(defaultChmod); err != nil {
+		return nil, errors.Wrap(err, "cannot chmod temporary file")
+	}
 	c.AddFile(f)
 
 	// Buffer writes to disk
@@ -97,6 +106,9 @@ func (c *Context) Persist(name string, r io.Reader) error {
 	f, err := os.Create(filepath.Join(c.Workdir, name))
 	if err != nil {
 		return errors.Wrap(err, "cannot create file")
+	}
+	if err := f.Chmod(defaultChmod); err != nil {
+		return errors.Wrap(err, "cannot chmod file")
 	}
 
 	// Buffer writes to disk
