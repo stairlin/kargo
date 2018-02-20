@@ -22,6 +22,7 @@ type Context struct {
 	mu      sync.RWMutex
 	closers []io.Closer
 	files   []*os.File
+	dirs    []string
 	logger  log.Logger
 
 	// UUID is the unique context ID
@@ -135,7 +136,12 @@ func (c *Context) TempPath() string {
 	if err != nil {
 		panic(err)
 	}
-	return filepath.Join(dir, "kargo"+uuid.New().String())
+	path := filepath.Join(dir, "kargo"+uuid.New().String())
+
+	c.mu.Lock()
+	c.dirs = append(c.dirs, path)
+	c.mu.Unlock()
+	return path
 }
 
 // Cleanup closes all closers and removes all temporary files. This should be
@@ -153,6 +159,10 @@ func (c *Context) Cleanup() {
 		os.Remove(file.Name())
 	}
 	c.files = []*os.File{}
+	for _, dir := range c.dirs {
+		os.RemoveAll(dir)
+	}
+	c.dirs = []string{}
 }
 
 // AddCloser registers a resource to be closed at the end of this context
