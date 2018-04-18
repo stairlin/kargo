@@ -54,5 +54,5 @@ FROM busybox
 # Retrieve the binary from the previous stage
 COPY --from=builder /usr/bin/${BIN} /usr/local/bin/${BIN}
 
-# Set the binary as the entrypoint of the container
-ENTRYPOINT [ "kargo" ]
+# Set the binary as default argument of the container
+CMD [ "kargo" ]
