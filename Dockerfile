@@ -49,7 +49,7 @@ RUN set -ex && \
 # allowing us to start with a fat build image and end up with
 # a very small runtime image. Another common option is using
 # `alpine` so that the end image also has a package manager.
-FROM busybox
+FROM alpine
 
 # Retrieve the binary from the previous stage
 COPY --from=builder /usr/bin/${BIN} /usr/local/bin/${BIN}
