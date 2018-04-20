@@ -90,13 +90,18 @@ func (c *Context) CreateTempFile(r io.Reader) (*os.File, error) {
 
 	// Buffer writes to disk
 	buf := bufio.NewWriter(f)
-	defer buf.Flush()
 
 	_, err = io.Copy(buf, r)
 	switch err {
 	case nil, io.ErrUnexpectedEOF:
 	default:
 		return nil, errors.Wrap(err, "cannot copy temp file")
+	}
+	if err := buf.Flush(); err != nil {
+		return nil, errors.Wrap(err, "cannot flush buffer to temp file")
+	}
+	if _, err := f.Seek(0, 0); err != nil {
+		return nil, errors.Wrap(err, "cannot rewind temp file")
 	}
 	return f, nil
 }
