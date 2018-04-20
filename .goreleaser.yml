@@ -4,11 +4,6 @@ release:
     owner: stairlin
     name: kargo
   name_template: '{{.Tag}}'
-brew:
-  commit_author:
-    name: goreleaserbot
-    email: goreleaser@carlosbecker.com
-  install: bin.install "kargo"
 scoop:
   commit_author:
     name: goreleaserbot
@@ -68,7 +63,10 @@ sign:
 env_files:
   github_token: ~/.config/goreleaser/github_token
 brew:
-  # Reporitory to push the tap to.
+  commit_author:
+    name: stairlin
+    email: it@stairlin.com
+  install: bin.install "kargo"
   github:
     owner: stairlin
     name: homebrew-tap
