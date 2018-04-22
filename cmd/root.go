@@ -58,7 +58,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 	rootCmd.PersistentFlags().StringVar(&configPath, "config", "", "config file")
-	rootCmd.PersistentFlags().StringVar(&workdir, "workdir", ".", "directory where temporary files are stored")
+	rootCmd.PersistentFlags().StringVar(&workdir, "workdir", "", "directory where temporary files are stored")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.

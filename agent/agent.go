@@ -70,6 +70,8 @@ func Build(ctx *context.Context, configPath string) (*Agent, error) {
 	}
 	if ctx.Workdir == "" {
 		ctx.Workdir = a.Workdir
+	} else {
+		ctx.Workdir = "."
 	}
 
 	// Source
