@@ -1,5 +1,4 @@
-# 🚢 Kargo - Backup & Restore [![CircleCI](https://circleci.com/gh/stairlin/kargo.svg?style=svg&circle-token=a0e2b657eb18a1c303535c8d122ba8a09d0a9f98)](https://circleci.com/gh/stairlin/kargo) [![Go Report Card](https://goreportcard.com/badge/github.com/stairlin/kargo)](https://goreportcard.com/report/github.com/stairlin/kargo)
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fstairlin%2Fkargo.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fstairlin%2Fkargo?ref=badge_shield)
+# 🚢 Kargo - Backup & Restore [![CircleCI](https://circleci.com/gh/stairlin/kargo.svg?style=svg&circle-token=a0e2b657eb18a1c303535c8d122ba8a09d0a9f98)](https://circleci.com/gh/stairlin/kargo) [![Go Report Card](https://goreportcard.com/badge/github.com/stairlin/kargo)](https://goreportcard.com/report/github.com/stairlin/kargo) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fstairlin%2Fkargo.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fstairlin%2Fkargo?ref=badge_shield)
 
 Kargo is a CLI written in Go for transporting everything everywhere, which makes it the ideal companion to backup & restore data.
 
