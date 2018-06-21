@@ -54,7 +54,7 @@ FROM alpine
 # Install common CA certificates PEM files
 # Otherwise outbound https requests fail with:
 # "x509: failed to load system roots and no roots provided"
-RUN apk --no-cache add ca-certificates && update-ca-certificates
+RUN apk --no-cache add ca-certificates
 
 # Retrieve the binary from the previous stage
 COPY --from=builder /usr/bin/${BIN} /usr/local/bin/${BIN}
