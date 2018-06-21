@@ -1,0 +1,38 @@
+FROM stairlin/kargo as source
+
+FROM debian:stretch
+
+# Install dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    apt-get -qq -y update && \
+    apt-get -qq -y install --no-install-recommends --no-install-suggests \
+    curl ca-certificates git build-essential \
+    && apt-get clean \
+    && rm -r /var/lib/apt/lists/*
+
+# Install Foundation DB client
+ENV fdb_version="5.1.7"
+RUN mkdir -p /var/lib/foundationdb && \
+    curl -fsSL "https://www.foundationdb.org/downloads/${fdb_version}/ubuntu/installers/foundationdb-clients_${fdb_version}-1_amd64.deb" > foundationdb-client.deb && \
+    dpkg --force-confdef --install foundationdb-client.deb
+RUN rm -Rf /var/lib/foundationdb /var/log/foundationdb /etc/foundationdb && \
+    rm -Rf *.deb /var/lib/apt/lists /var/cache/apt
+RUN mkdir -p \
+    /var/lib/foundationdb \
+    /usr/lib/foundationdb \
+    /var/log/foundationdb \
+    /etc/foundationdb
+RUN usermod -u 2005 foundationdb && \
+    groupmod -g 2005 foundationdb && \
+    chown -R foundationdb:foundationdb /var/lib/foundationdb && \
+    chmod -R 0700 /var/lib/foundationdb && \
+    chown -R foundationdb:foundationdb /usr/lib/foundationdb && \
+    chmod -R 0700 /usr/lib/foundationdb && \
+    chown -R foundationdb:foundationdb /var/log/foundationdb && \
+    chmod -R 0700 /var/log/foundationdb && \
+    chown -R foundationdb:foundationdb /etc/foundationdb && \
+    chmod -R 0700 /etc/foundationdb
+
+# Retrieve the binary from the previous stage
+COPY --from=source /usr/local/bin/kargo /usr/local/bin/kargo
