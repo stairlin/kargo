@@ -133,6 +133,7 @@ Example of a configuration file.
 1. [Consul](./plugin/source/consul)
 2. [Couchbase](./plugin/source/couchbase)
 3. [Directory](./plugin/source/dir)
+3. [FoundationDB](./plugin/source/foundationdb)
 4. [InfluxDB](./plugin/source/influxdb)
 5. [PostgreSQL](./plugin/source/postgresql)
 
