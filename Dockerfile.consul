@@ -1,0 +1,9 @@
+FROM stairlin/kargo
+
+RUN apk update && apk upgrade && apk add curl unzip
+
+RUN curl -o consul.zip https://releases.hashicorp.com/consul/1.0.7/consul_1.0.7_linux_amd64.zip && \
+    unzip consul.zip && \
+    mv consul /bin
+
+
