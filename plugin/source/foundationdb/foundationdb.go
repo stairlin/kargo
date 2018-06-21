@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"time"
 
@@ -100,8 +102,21 @@ func (s *Source) Backup(ctx *context.Context) (io.ReadCloser, error) {
 		return nil, errors.Wrap(s.parseError(err), "fdbbackup error")
 	}
 
+	// Get backup directory
+	files, err := ioutil.ReadDir(dest)
+	if err != nil {
+		return nil, errors.Wrap(err, "error listing backup folder")
+	}
+	if len(files) == 0 {
+		return nil, errors.New("backup file not found")
+	}
+	if len(files) > 1 {
+		return nil, errors.New("multiple (potential) backups found")
+	}
+	backupRootDir := files[0].Name()
+
 	// Create tarball
-	tarball := dest + ".tar"
+	tarball := path.Join(dest, backupRootDir+".tar")
 	cmd = exec.Command(execTar, "-cvf", tarball, "-C", dest, ".")
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
