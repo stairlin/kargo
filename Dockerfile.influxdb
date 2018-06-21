@@ -1,0 +1,8 @@
+FROM stairlin/kargo
+
+RUN apk update && apk upgrade && apk add curl
+
+RUN curl -o influxdb.tar.gz https://dl.influxdata.com/influxdb/releases/influxdb-1.5.2-static_linux_amd64.tar.gz && \
+    tar xvfz influxdb.tar.gz && \
+    mv influxdb-1.5.2-1/influxd /bin && \
+    rm -rf influxdb*
