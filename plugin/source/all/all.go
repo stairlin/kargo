@@ -5,6 +5,7 @@ import (
 	_ "github.com/stairlin/kargo/plugin/source/consul"
 	_ "github.com/stairlin/kargo/plugin/source/couchbase"
 	_ "github.com/stairlin/kargo/plugin/source/dir"
+	_ "github.com/stairlin/kargo/plugin/source/foundationdb"
 	_ "github.com/stairlin/kargo/plugin/source/influxdb"
 	_ "github.com/stairlin/kargo/plugin/source/postgresql"
 )
