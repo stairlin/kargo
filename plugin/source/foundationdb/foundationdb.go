@@ -91,7 +91,8 @@ func (s *Source) Backup(ctx *context.Context) (io.ReadCloser, error) {
 	if s.Tag != "" {
 		args = append(args, "-t", s.Tag)
 	}
-	args = append(args, "-d", dest)
+	destURI := "file://" + dest
+	args = append(args, "-d", destURI)
 	cmd := exec.Command(fdbBackup, args...)
 	var out bytes.Buffer
 	var stderr bytes.Buffer
@@ -178,7 +179,7 @@ func (s *Source) Restore(ctx *context.Context, r io.Reader) error {
 	if err != nil {
 		return errors.Wrap(err, "cannot get backup absolute path")
 	}
-	cmd := exec.Command(execTar, "-xvf", backupPath, "-C", dest)
+	cmd := exec.Command(execTar, "-xvf", backupPath, "-C", dest, ".")
 	var out bytes.Buffer
 	var stderr bytes.Buffer
 	cmd.Stdout = &out
@@ -198,7 +199,8 @@ func (s *Source) Restore(ctx *context.Context, r io.Reader) error {
 	if s.Tag != "" {
 		args = append(args, "-t", s.Tag)
 	}
-	args = append(args, "-r", dest)
+	destURI := "file://" + dest
+	args = append(args, "-r", destURI)
 	cmd = exec.Command(fdbRestore, args...)
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
