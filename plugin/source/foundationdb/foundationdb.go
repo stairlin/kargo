@@ -116,8 +116,9 @@ func (s *Source) Backup(ctx *context.Context) (io.ReadCloser, error) {
 	backupRootDir := files[0].Name()
 
 	// Create tarball
+	dir := path.Join(dest, backupRootDir)
 	tarball := path.Join(dest, backupRootDir+".tar")
-	cmd = exec.Command(execTar, "-cvf", tarball, "-C", dest, ".")
+	cmd = exec.Command(execTar, "-cvf", tarball, "-C", dir, ".")
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
