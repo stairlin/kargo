@@ -18,6 +18,7 @@ type Notification struct {
 
 	StartTime time.Time
 	EndTime   time.Time
+	Body      string
 	Error     error
 }
 

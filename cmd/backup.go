@@ -105,6 +105,7 @@ var backupCmd = &cobra.Command{
 			Operation: notification.Backup,
 			StartTime: ctx.StartTime,
 			EndTime:   time.Now(),
+			Body:      fmt.Sprintf("Key %s", key),
 		}
 		if err := agent.Notify(ctx, n); err != nil {
 			return
