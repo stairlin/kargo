@@ -73,7 +73,7 @@ func (n *Notifier) Send(
 	switch notif.Type {
 	case notification.Success:
 		text = fmt.Sprintf(
-			"%s done in %s", operation, duration.String(),
+			"%s done in %s - %s", operation, duration.String(), notif.Body,
 		)
 	case notification.Failure:
 		text = fmt.Sprintf(
